@@ -85,6 +85,32 @@ function upgradePlan(s,d){
   const th=s.buildings?.find(x=>x.data===1000001)?.lvl||d.th;
   const result=[],add=(title,reason,resource,price='',note='')=>result.push({title,reason,resource,price,note});
   const buildings=s.buildings||[],heroes=s.heroes||[];
+  // Personal army profile: Aphrodite and Nemesis use Dragons + Dragon Riders (Hydra).
+  // Keep this tactical recommendation separate from general village maxing.
+  if(d.tag==='#LULLQP8RU'||d.tag==='#LGL2RCYRY'){
+    const isNemesis=d.tag==='#LULLQP8RU';
+    const caps=isNemesis?{4000008:12,4000065:5}:{4000008:13,4000065:6};
+    const troopNames={4000008:'Dragon',4000065:'Dragon Rider'};
+    let remaining=0;
+    for(const id of [4000065,4000008]){
+      const troop=(s.units||[]).find(t=>t.data===id);
+      const cap=caps[id];
+      if(troop&&troop.lvl<cap){
+        remaining++;
+        const cost=(id===4000065&&troop.lvl===4)?'19M Elixir (base cost; discounts may apply)':'Check next-level price';
+        add(troopNames[id]+' '+troop.lvl+' → '+(troop.lvl+1),
+          'Core Hydra air troop. Focus research on the army you actually deploy. '+(troop.timer?'Upgrade already in progress.':'Start after the current Laboratory research finishes.'),
+          'Elixir',cost);
+      }
+    }
+    if(!remaining)add('Hydra core troops are TH'+th+' maxed',
+      'Dragons and Dragon Riders are at their current Town Hall caps. Shift research priorities to support troops and spells used in your actual attack composition.',
+      'No troop upgrade needed','0 Elixir for these two troops');
+    add('Protect your Hydra air push',
+      'Prioritize the spells you actually bring (often Freeze, Rage, Totem or Invisibility), and your main air-support heroes. Your exact spell loadout and equipment are not yet recorded.',
+      'Elixir / Dark Elixir','Choose loadout first');
+  }
+
   const lab=buildings.find(x=>x.data===1000007);
   if(lab&&LAB_CAPS[th]&&lab.lvl<LAB_CAPS[th]&&!lab.timer) add('Laboratory '+lab.lvl+' → '+(lab.lvl+1),'Unlocks the next tier of army research. Prioritize before routine defenses.','Elixir','Confirm in game');
   const camps=buildings.filter(x=>x.data===1000000);
