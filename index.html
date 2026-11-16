@@ -106,9 +106,24 @@ function upgradePlan(s,d){
     if(!remaining)add('Hydra core troops are TH'+th+' maxed',
       'Dragons and Dragon Riders are at their current Town Hall caps. Shift research priorities to support troops and spells used in your actual attack composition.',
       'No troop upgrade needed','0 Elixir for these two troops');
-    add('Protect your Hydra air push',
-      'Prioritize the spells you actually bring (often Freeze, Rage, Totem or Invisibility), and your main air-support heroes. Your exact spell loadout and equipment are not yet recorded.',
-      'Elixir / Dark Elixir','Choose loadout first');
+    // Actual Hydra spell loadout: Totem, Overgrowth, Rage, Freeze, Revive.
+    const spellCaps=isNemesis?{26000120:3,26000098:4,26000070:4,26000002:6,26000005:7}:{26000120:4,26000098:5,26000070:5,26000002:7,26000005:8};
+    const spellNames={26000120:'Totem',26000098:'Revive',26000070:'Overgrowth',26000002:'Rage',26000005:'Freeze'};
+    const spellOrder=[26000120,26000098,26000070,26000002,26000005];
+    let spellNeeds=0;
+    for(const id of spellOrder){
+      const spell=(s.spells||[]).find(v=>v.data===id);
+      if(!spell||spell.lvl>=spellCaps[id])continue;
+      spellNeeds++;
+      const price=isNemesis&&id===26000120&&spell.lvl===2?'22M Elixir (base cost)':isNemesis&&id===26000098&&spell.lvl===3?'20M Elixir (base cost)':'Check next-level price';
+      add(spellNames[id]+' Spell '+spell.lvl+' → '+(spell.lvl+1),
+        'One of your five Hydra spells. '+(spell.timer?'Already researching.':'Reserve resources for when Laboratory research becomes available.'),
+        id===26000070?'Dark Elixir':'Elixir',price);
+    }
+    if(!spellNeeds)add('Hydra spell loadout is maxed for TH'+th,
+      'Your Totem, Overgrowth, Rage, Freeze and Revive spells have all reached their current Town Hall caps.',
+      'No spell research needed','0 for these five');
+
   }
 
   const lab=buildings.find(x=>x.data===1000007);
